@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GreenDash</title>
+<style>
+:root{
+  color-scheme:light;
+  --ink:#17332e; --muted:#566b64; --field:#ffffff; --panel:#ffffff; --line:#dde5e2; --soft:#f4f7f6;
+  --do:#0b6b55; --uoc:#a85d08; --bad:#b3261e; --ok:#0b6b55; --accent:#17332e; --onaccent:#ffffff;
+  --cpu:#1f6fb2; --ram:#7b4bb0;
+  --font:"Segoe UI Variable","Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{scrollbar-gutter:stable}
+body{margin:0;background:var(--field);color:var(--ink);font:15px/1.5 var(--font);font-variant-numeric:tabular-nums}
+h1,h2,h3{margin:0;font-weight:650}
+h2{font-size:17px}
+h3{font-size:14px;color:var(--muted);font-weight:600}
+button,select,input{font:inherit;color:inherit}
+button{background:var(--accent);color:var(--onaccent);border:0;border-radius:6px;padding:7px 14px;cursor:pointer}
+button.phu{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button:disabled{opacity:.5;cursor:default}
+button:focus-visible,select:focus-visible,input:focus-visible,[role=tab]:focus-visible{outline:2px solid var(--do);outline-offset:2px}
+input,select{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:7px 9px}
+[hidden]{display:none!important}
+
+/* khung */
+header.top{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line)}
+.top .hang1{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px 24px;max-width:1180px;margin:0 auto}
+.logo{font-size:19px;font-weight:700;letter-spacing:.2px}
+.cong{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+nav[role=tablist]{display:flex;gap:2px;max-width:1180px;margin:0 auto;padding:0 18px;overflow-x:auto}
+[role=tab]{background:none;color:var(--muted);border:0;border-bottom:3px solid transparent;border-radius:0;padding:9px 14px;white-space:nowrap}
+[role=tab][aria-selected=true]{color:var(--ink);border-bottom-color:var(--do);font-weight:650}
+.badge-n{display:inline-block;min-width:20px;margin-left:6px;padding:0 6px;border-radius:10px;background:var(--bad);color:#fff;font-size:12px;text-align:center}
+main{max-width:1180px;margin:0 auto;padding:20px 24px 70px;display:grid;gap:18px}
+.luoi{display:grid;gap:18px;grid-template-columns:repeat(12,1fr)}
+.c12{grid-column:span 12}.c8{grid-column:span 8}.c7{grid-column:span 7}.c6{grid-column:span 6}.c5{grid-column:span 5}.c4{grid-column:span 4}
+@media (max-width:900px){.c8,.c7,.c6,.c5,.c4{grid-column:span 12}.top .hang1{padding:10px 14px}main{padding:16px 14px 60px}}
+section.the{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;min-width:0;box-shadow:none}
+.the .dau{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.cuon{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:13px;white-space:nowrap}
+td.so,th.so{text-align:right}
+.trong{color:var(--muted);padding:14px 2px}
+
+/* nhãn Đo / Ước lượng */
+.nhan{display:inline-flex;align-items:center;gap:6px;padding:1px 9px;font-size:13px;border:1px solid currentColor;border-radius:4px;white-space:nowrap}
+.nhan i{width:12px;height:12px;display:inline-block;border-radius:2px}
+.nhan.Do{color:var(--do)} .nhan.Do i{background:var(--do)}
+.nhan.UocLuong,.nhan.UocLuongMotPhan{color:var(--uoc)}
+.nhan.UocLuong i,.nhan.UocLuongMotPhan i{background:repeating-linear-gradient(45deg,var(--uoc) 0 3px,transparent 3px 6px);outline:1px solid var(--uoc)}
+.nhan.UocLuongMotPhan i{background:linear-gradient(90deg,var(--do) 50%,transparent 50%),repeating-linear-gradient(45deg,var(--uoc) 0 3px,transparent 3px 6px)}
+
+/* hero */
+.hero{display:grid;gap:14px}
+.hero .lon{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.hero .lon b{font-size:46px;line-height:1;font-weight:700;letter-spacing:-.5px}
+.hero .lon span.dv{font-size:18px;color:var(--muted)}
+.loicam{border-left:4px solid var(--uoc);background:var(--soft);padding:9px 12px;border-radius:0 6px 6px 0;font-size:14px}
+.loicam.do{border-left-color:var(--do)}
+.kpi{display:grid;gap:2px}
+.kpi b{font-size:24px;font-weight:650}
+.kpi small{color:var(--muted)}
+.tt{display:inline-flex;align-items:center;gap:8px;font-size:14px}
+.tt .cham{width:10px;height:10px;border-radius:50%;background:var(--muted)}
+.tt.ok .cham{background:var(--ok);box-shadow:0 0 0 0 var(--ok);animation:nhip 2.4s ease-out infinite}
+.tt.loi .cham{background:var(--bad)}
+@keyframes nhip{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--ok) 55%,transparent)}70%,100%{box-shadow:0 0 0 9px transparent}}
+@media (prefers-reduced-motion:reduce){.tt.ok .cham{animation:none}}
+
+/* biểu đồ */
+svg.bd{width:100%;height:auto;display:block;overflow:visible}
+svg.bd text{fill:var(--muted);font-size:11px;font-family:var(--font)}
+svg.bd .luoi-y{stroke:var(--line);stroke-width:1}
+.chuthich{display:flex;gap:16px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin-top:8px}
+.chuthich .m{display:inline-flex;align-items:center;gap:6px}
+.chuthich .m i{width:14px;height:3px;display:inline-block;border-radius:2px}
+
+/* thanh dung lượng trang */
+.chong{display:flex;height:12px;border-radius:3px;overflow:hidden;background:var(--line);min-width:140px}
+.chong span{display:block;height:100%}
+.sa{background:var(--cpu)}.sj{background:var(--uoc)}.sc{background:var(--ram)}.sk{background:var(--muted)}
+
+/* đăng nhập */
+#dangnhap{max-width:380px;margin:9vh auto 0;padding:26px;display:grid;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+#dangnhap p{margin:0;color:var(--muted);font-size:14px}
+.loi{color:var(--bad)}
+.thongbao{color:var(--muted)}
+
+/* hộp thoại và thông báo */
+dialog{border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);padding:20px;max-width:420px;width:calc(100% - 32px)}
+dialog::backdrop{background:rgba(23,51,46,.35)}
+dialog .hang{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+dialog input{width:100%;margin-top:10px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--accent);color:var(--onaccent);padding:9px 16px;border-radius:8px;max-width:90vw;z-index:20;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.hien{opacity:1}
+#toast.loi{background:var(--bad);color:#fff}
+details summary{cursor:pointer;color:var(--muted);font-size:14px}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:13px;background:var(--soft);padding:1px 5px;border-radius:4px}
+
+/* ===== Bảng màu có chiều sâu: nền xanh nhạt, đầu trang xanh đậm, thẻ trắng có vạch màu ===== */
+:root{--accent:#0b6b55;--nen:#e6f0ec;--nen2:#f3f8f6;--dau1:#0d3b32;--dau2:#146b55;--vang:#d99a1c}
+body{background:var(--nen)}
+header.top{background:var(--dau1);border-bottom:0;color:#fff;box-shadow:none}
+header.top .logo{color:#fff}
+header.top .logo::before{content:"";display:inline-block;width:12px;height:12px;border-radius:50%;background:#7be0b8;margin-right:9px;box-shadow:none}
+header.top label{color:#e3f4ec}
+header.top button.phu{color:#fff;border-color:rgba(255,255,255,.45)}
+header.top button.phu:hover{background:rgba(255,255,255,.14)}
+header.top select{border-color:transparent;color:#17332e;background:#fff}
+header.top [role=tab]{color:rgba(255,255,255,.72)}
+header.top [role=tab]:hover{color:#fff}
+header.top [role=tab][aria-selected=true]{color:#fff;border-bottom-color:#7be0b8}
+header.top .tt{color:#fff}
+section.the{border:1px solid #d3e2dc;box-shadow:none}
+section.hero{background:var(--panel)}
+.the h2{color:var(--dau1)}
+th{background:#eef5f2;color:#3f5a52}
+tbody tr:hover td{background:#f1f8f5}
+.kpi{background:none;border-radius:0;padding:2px 0}
+.loicam,.loicam.do{border-left:0;background:none;padding:6px 0}
+button:not(.phu):not([role=tab]):hover{filter:brightness(1.1)}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <pattern id="gach" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="7" height="7" style="fill:var(--panel)"/>
+      <rect width="3.5" height="7" style="fill:var(--uoc)"/>
+    </pattern>
+    <pattern id="gachMot" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="7" height="7" style="fill:var(--do)"/>
+      <rect width="3.5" height="7" style="fill:var(--uoc)"/>
+    </pattern>
+  </defs>
+</svg>
+
+<header class="top" id="thanhtren" hidden>
+  <div class="hang1">
+    <span class="logo">GreenDash</span>
+    <div class="cong">
+      <label>Sản phẩm <select id="sp"></select></label>
+      <label class="cong" style="gap:5px"><input type="checkbox" id="tulam" checked style="padding:0"> Tự làm mới</label>
+      <button id="chay" class="phu" title="Quy đổi carbon, ghi cảnh báo và tạo đề xuất ngay bây giờ">Chạy xử lý ngay</button>
+      <button id="csv" class="phu">Tải CSV</button>
+      <button id="thoat" class="phu">Đăng xuất</button>
+    </div>
+  </div>
+  <nav role="tablist" aria-label="Khu vực">
+    <button role="tab" id="t-tq" aria-selected="true" data-tab="tq">Tổng quan</button>
+    <button role="tab" id="t-ht" aria-selected="false" data-tab="ht">Hạ tầng</button>
+    <button role="tab" id="t-tr" aria-selected="false" data-tab="tr">Trang web</button>
+    <button role="tab" id="t-cb" aria-selected="false" data-tab="cb">Cảnh báo và hành động<span class="badge-n" id="bdg" hidden></span></button>
+  </nav>
+</header>
+
+<form id="dangnhap">
+  <h1>GreenDash</h1>
+  <p>Theo dõi điện năng và carbon của sản phẩm phần mềm. Mỗi con số đều ghi rõ là Đo hay Ước lượng.</p>
+  <input id="tdn" placeholder="Tên đăng nhập" autocomplete="username" aria-label="Tên đăng nhập">
+  <input id="mk" type="password" placeholder="Mật khẩu" autocomplete="current-password" aria-label="Mật khẩu">
+  <button id="vao" type="submit">Đăng nhập</button>
+  <div id="loidn" class="loi" role="alert"></div>
+</form>
+
+<main id="noidung" hidden>
+
+  <!-- TỔNG QUAN -->
+  <div id="p-tq" class="luoi" role="tabpanel" aria-labelledby="t-tq">
+    <section class="the c7 hero">
+      <div class="dau"><h2>Carbon đã phát thải <small class="thongbao" style="font-weight:400">(g CO₂e theo ngày)</small></h2><span id="tinhtrang" class="tt"></span></div>
+      <div class="lon" id="heroSo"></div>
+      <div id="bdNgay"></div>
+      <div class="chuthich">
+        <span class="m"><i style="background:var(--do)"></i>Đo (có công suất thật)</span>
+        <span class="m"><i style="background:repeating-linear-gradient(45deg,var(--uoc) 0 3px,transparent 3px 6px);height:9px;outline:1px solid var(--uoc)"></i>Ước lượng</span>
+      </div>
+    </section>
+    <section class="the c5">
+      <div class="dau"><h2>Chỉ số chính</h2></div>
+      <div class="luoi" style="gap:16px" id="kpi"></div>
+    </section>
+    <section class="the c12">
+      <div class="dau"><h2>Từng ngày</h2><span class="thongbao" id="ghiChuNgay"></span></div>
+      <div class="cuon"><table id="bangNgay"></table></div>
+    </section>
+  </div>
+
+  <!-- HẠ TẦNG -->
+  <div id="p-ht" class="luoi" role="tabpanel" aria-labelledby="t-ht" hidden>
+    <section class="the c6"><div class="dau"><h2>CPU</h2><h3 id="cpuHienTai"></h3></div><div id="bdCpu"></div></section>
+    <section class="the c6"><div class="dau"><h2>RAM</h2><h3 id="ramHienTai"></h3></div><div id="bdRam"></div></section>
+    <section class="the c12">
+      <div class="dau"><h2>Số liệu gần nhất</h2></div>
+      <div class="cuon"><table id="bangHt"></table></div>
+    </section>
+  </div>
+
+  <!-- TRANG WEB -->
+  <div id="p-tr" class="luoi" role="tabpanel" aria-labelledby="t-tr" hidden>
+    <section class="the c12">
+      <div class="dau"><h2>Hiệu năng trang, trung bình 7 ngày</h2>
+        <div class="chuthich" style="margin:0">
+          <span class="m"><i class="sa" style="height:9px"></i>Ảnh</span><span class="m"><i class="sj" style="height:9px"></i>JS</span>
+          <span class="m"><i class="sc" style="height:9px"></i>CSS</span><span class="m"><i class="sk" style="height:9px"></i>Khác</span>
+        </div>
+      </div>
+      <div class="cuon"><table id="bangTrang"></table></div>
+    </section>
+
+    <section class="the c12">
+      <div class="dau"><h2>Thêm trang web cần đo</h2></div>
+      <form id="fTrang" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input id="urlMoi" type="url" required placeholder="https://trang-cua-ban.com/gioi-thieu" style="flex:1;min-width:260px">
+        <button type="submit">Thêm trang</button>
+      </form>
+      <label style="display:flex;gap:6px;align-items:center;margin-top:8px;font-size:14px;color:var(--muted)"><input type="checkbox" id="trangCuaToi" style="padding:0"> Đây là trang web của tôi (hoặc tôi được phép đo). Không đo trang của bên thứ ba.</label>
+      <div class="cuon" style="margin-top:10px"><table id="bangUrl"></table></div>
+    </section>
+  </div>
+
+  <!-- CẢNH BÁO VÀ HÀNH ĐỘNG -->
+  <div id="p-cb" class="luoi" role="tabpanel" aria-labelledby="t-cb" hidden>
+    <section class="the c12" style="border-left:4px solid var(--bad)">
+      <div class="dau"><h2>Cảnh báo đang mở</h2></div>
+      <div class="cuon"><table id="bangCb"></table></div>
+    </section>
+    <section class="the c12">
+      <div class="dau"><h2>Hành động giảm tác động</h2></div>
+      <div class="cuon"><table id="bangHd"></table></div>
+      <div id="ketquaDG" style="margin-top:10px"></div>
+    </section>
+  </div>
+</main>
+
+<dialog id="hopDong">
+  <form method="dialog" id="fDong">
+    <h2>Đóng cảnh báo</h2>
+    <input id="ghiChu" placeholder="Ví dụ: đã tăng tài nguyên máy chủ" required minlength="3" maxlength="300" aria-label="Lý do đóng">
+    <div class="hang"><button type="button" class="phu" id="huyDong">Hủy</button><button type="submit">Đóng cảnh báo</button></div>
+  </form>
+</dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+let token = sessionStorage.getItem("gd_token") || "";
+let tab = "tq", dl = null, hen = null, dangTai = false, cbDangDong = null;
+const $ = id => document.getElementById(id);
+const NHAN = {Do:"Đo", UocLuong:"Ước lượng", UocLuongMotPhan:"Ước lượng một phần"};
+const TC = {Cao:"Cao", TrungBinh:"Trung bình", Thap:"Thấp"};
+const TT_HD = {DeXuat:"Đề xuất", DaChapNhan:"Đã chấp nhận", TuChoi:"Từ chối", DaApDung:"Đã áp dụng"};
+const TT_CB = {Mo:"Mở", DaXacNhan:"Đã xác nhận", DaDong:"Đã đóng"};
+const CHI_TIEU = {Cpu:"CPU trung bình 1 giờ (%)", Carbon:"Carbon 24 giờ (g)"};
+
+function esc(s){ return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function so(v, d=2){ return v == null || v === "" ? "" : Number(v).toLocaleString("vi-VN", {maximumFractionDigits:d}); }
+function utc(t){ const s = String(t); return new Date(/[zZ]|[+-]\d\d:?\d\d$/.test(s) ? s : s.replace(" ","T") + "Z"); }
+function gio(t){ return utc(t).toLocaleTimeString("vi-VN", {hour:"2-digit", minute:"2-digit"}); }
+function ngayGio(t){ return utc(t).toLocaleString("vi-VN", {day:"2-digit", month:"2-digit", hour:"2-digit", minute:"2-digit", second:"2-digit"}); }
+function ngay(v){ const [y,m,d] = String(v).slice(0,10).split("-"); return `${d}/${m}/${y}`; }
+function nhan(k){ return `<span class="nhan ${esc(k)}"><i></i>${esc(NHAN[k]||k)}</span>`; }
+function gamHienThi(g){ return g >= 1000 ? [so(g/1000,3), "kg"] : [so(g,2), "g"]; }
+
+function toast(msg, loi=false){
+  const t = $("toast"); t.textContent = msg; t.className = "hien" + (loi ? " loi" : "");
+  clearTimeout(toast.h); toast.h = setTimeout(() => t.className = "", loi ? 5000 : 2600);
+}
+
+async function api(path, opt={}){
+  const r = await fetch(path, {...opt, headers:{"Content-Type":"application/json", ...(token?{Authorization:"Bearer "+token}:{}), ...(opt.headers||{})}});
+  if (r.status === 401 && token){ dangXuat(); throw new Error("Hết phiên đăng nhập, hãy đăng nhập lại"); }
+  const t = await r.text(); let j = null; try{ j = JSON.parse(t); }catch(e){}
+  if (!r.ok){ const d = j && j.detail; throw new Error(typeof d === "string" ? d : JSON.stringify(d || t)); }
+  return j;
+}
+
+/* ---------- biểu đồ SVG ---------- */
+function bieuDoCot(ds){            // ds: [{ngay, g, nhan}]
+  if (!ds.length) return `<p class="trong">Chưa có kết quả carbon. Bấm "Chạy xử lý ngay" sau khi có số liệu hạ tầng.</p>`;
+  const W = 640, H = 200, L = 46, B = 26, T = 10;
+  const max = Math.max(...ds.map(d => d.g)) * 1.15 || 1;
+  const bw = Math.min(64, (W - L) / ds.length * .6), buoc = (W - L) / ds.length;
+  let s = `<svg class="bd" viewBox="0 0 ${W} ${H}" role="img" aria-label="Carbon theo ngày">`;
+  for (let i = 0; i <= 3; i++){
+    const y = T + (H - B - T) * (1 - i/3), v = max * i/3;
+    s += `<line class="luoi-y" x1="${L}" x2="${W}" y1="${y}" y2="${y}"/><text x="${L-6}" y="${y+4}" text-anchor="end">${so(v, v<10?2:0)}</text>`;
+  }
+  ds.forEach((d, i) => {
+    const h = Math.max(2, (H - B - T) * d.g / max), x = L + buoc * i + (buoc - bw) / 2, y = H - B - h;
+    const fill = d.nhan === "Do" ? "var(--do)" : d.nhan === "UocLuong" ? "url(#gach)" : "url(#gachMot)";
+    s += `<rect x="${x}" y="${y}" width="${bw}" height="${h}" rx="3" fill="${fill}" style="stroke:${d.nhan==="Do"?"var(--do)":"var(--uoc)"};stroke-width:1.2"><title>${ngay(d.ngay)}: ${so(d.g)} g CO₂e (${NHAN[d.nhan]||d.nhan})</title></rect>`;
+    s += `<text x="${x+bw/2}" y="${H-8}" text-anchor="middle">${ngay(d.ngay).slice(0,5)}</text>`;
+  });
+  return s + `</svg>`;
+}
+
+function bieuDoDuong(pts, mau, dv, tran){   // pts: [{t, v}] tăng dần theo thời gian
+  if (pts.length < 2) return `<p class="trong">Cần ít nhất hai điểm số liệu để vẽ đường. Đợi thêm một vài phút.</p>`;
+  const W = 640, H = 190, L = 50, B = 24, T = 10;
+  let lo = Math.min(...pts.map(p => p.v)), hi = Math.max(...pts.map(p => p.v));
+  lo = 0; hi = tran != null ? tran : (hi * 1.15 || 1);      // trục luôn bắt đầu từ 0 để không phóng đại dao động
+  const t0 = utc(pts[0].t).getTime(), t1 = utc(pts[pts.length-1].t).getTime() || t0 + 1;
+  const X = t => L + (W - L) * (utc(t).getTime() - t0) / (t1 - t0 || 1), Y = v => T + (H - B - T) * (1 - (v - lo) / (hi - lo || 1));
+  let s = `<svg class="bd" viewBox="0 0 ${W} ${H}" role="img" aria-label="Biểu đồ ${esc(dv)}">`;
+  for (let i = 0; i <= 3; i++){
+    const v = lo + (hi - lo) * i/3, y = Y(v);
+    s += `<line class="luoi-y" x1="${L}" x2="${W}" y1="${y}" y2="${y}"/><text x="${L-6}" y="${y+4}" text-anchor="end">${so(v, hi>100?0:1)}</text>`;
+  }
+  const d = pts.map((p, i) => `${i?"L":"M"}${X(p.t).toFixed(1)} ${Y(p.v).toFixed(1)}`).join(" ");
+  s += `<path d="${d} L${X(pts[pts.length-1].t).toFixed(1)} ${H-B} L${X(pts[0].t).toFixed(1)} ${H-B} Z" style="fill:${mau};opacity:.12"/>`;
+  s += `<path d="${d}" fill="none" style="stroke:${mau};stroke-width:2;stroke-linejoin:round"/>`;
+  const l = pts[pts.length-1];
+  s += `<circle cx="${X(l.t)}" cy="${Y(l.v)}" r="4" style="fill:${mau}"/>`;
+  s += `<text x="${L}" y="${H-6}">${gio(pts[0].t)}</text><text x="${W}" y="${H-6}" text-anchor="end">${gio(l.t)}</text>`;
+  return s + `</svg>`;
+}
+
+/* ---------- vẽ giao diện ---------- */
+function veTongQuan(d){
+  const cn = d.carbonNgay, tongG = cn.reduce((a,r)=>a+Number(r.CarbonG),0), tongKwh = cn.reduce((a,r)=>a+Number(r.NangLuongKWh),0);
+  const nh = !cn.length ? null : cn.every(r=>r.NhanTongHop==="Do") ? "Do" : cn.every(r=>r.NhanTongHop==="UocLuong") ? "UocLuong" : "UocLuongMotPhan";
+  if (cn.length){
+    const [v, dv] = gamHienThi(tongG);
+    $("heroSo").innerHTML = `<b>${v}</b><span class="dv">${dv} CO₂e</span>${nhan(nh)}`;
+  } else {
+    $("heroSo").innerHTML = `<b>–</b>`;
+  }
+  $("bdNgay").innerHTML = bieuDoCot(cn.map(r => ({ngay:r.Ngay, g:Number(r.CarbonG), nhan:r.NhanTongHop})));
+
+  const moi = cn.length ? cn[cn.length-1] : null, ht = d.soLieuGanDay;
+  const cpuTb = ht.length ? ht.reduce((a,r)=>a+Number(r.CpuPhanTram),0)/ht.length : null;
+  $("kpi").innerHTML = [
+    ["Điện năng", cn.length ? so(tongKwh,4)+" kWh" : "–", `${cn.length} ngày có dữ liệu`],
+    ["Độ tin cậy", moi ? (TC[moi.DoTinCayThapNhat]||"–") : "–", "mức thấp nhất trong kỳ"],
+    ["CPU trung bình", cpuTb==null ? "–" : so(cpuTb,1)+"%", `${ht.length} điểm gần nhất`],
+    ["Chờ quy đổi", so(d.soDiemChuaQuyDoi,0), "điểm số liệu mới"],
+  ].map(k => `<div class="kpi c6" style="grid-column:span 6"><small>${k[0]}</small><b>${k[1]}</b><small>${k[2]}</small></div>`).join("");
+
+  $("ghiChuNgay").textContent = moi ? "Nguồn hệ số: " + (moi.NguonHeSo||"") : "";
+  $("bangNgay").innerHTML = cn.length ? `<tr><th>Ngày</th><th class="so">Carbon (g)</th><th class="so">Điện năng (kWh)</th><th>Nhãn</th><th>Độ tin cậy</th><th class="so">Số điểm</th><th>Nguồn hệ số</th></tr>` +
+    cn.slice().reverse().map(r => `<tr><td>${ngay(r.Ngay)}</td><td class="so">${so(r.CarbonG)}</td><td class="so">${so(r.NangLuongKWh,4)}</td><td>${nhan(r.NhanTongHop)}</td><td>${TC[r.DoTinCayThapNhat]||""}</td><td class="so">${so(r.SoDiem,0)}</td><td>${esc(r.NguonHeSo)}${r.SoNguonHeSo>1?` (+${r.SoNguonHeSo-1} nguồn khác)`:""}</td></tr>`).join("")
+    : `<tr><td class="trong">Chưa có dữ liệu.</td></tr>`;
+
+  // trạng thái nhận số liệu
+  const tt = $("tinhtrang");
+  if (!ht.length){ tt.className = "tt loi"; tt.innerHTML = `<span class="cham"></span>Chưa nhận số liệu hạ tầng`; }
+  else {
+    const ph = Math.round((Date.now() - utc(ht[0].ThoiDiem).getTime()) / 60000);
+    if (ph <= 3){ tt.className = "tt ok"; tt.innerHTML = `<span class="cham"></span>Đang nhận số liệu, mới nhất ${ph<=0?"vừa xong":ph+" phút trước"}`; }
+    else { tt.className = "tt loi"; tt.innerHTML = `<span class="cham"></span>Mất tín hiệu ${ph<120?ph+" phút":Math.round(ph/60)+" giờ"}: kiểm tra Collector`; }
+  }
+}
+
+function veHaTang(d){
+  const ht = d.soLieuGanDay.slice().reverse();      // tăng dần theo thời gian
+  const cuoi = d.soLieuGanDay[0];
+  $("cpuHienTai").textContent = cuoi ? so(cuoi.CpuPhanTram,1) + "% lúc " + gio(cuoi.ThoiDiem) : "";
+  $("ramHienTai").textContent = cuoi ? so(cuoi.RamMB/1024,1) + " GB lúc " + gio(cuoi.ThoiDiem) : "";
+  $("bdCpu").innerHTML = bieuDoDuong(ht.map(r => ({t:r.ThoiDiem, v:Number(r.CpuPhanTram)})), "var(--cpu)", "CPU %", 100);
+  $("bdRam").innerHTML = bieuDoDuong(ht.map(r => ({t:r.ThoiDiem, v:Number(r.RamMB)/1024})), "var(--ram)", "RAM GB");
+  $("bangHt").innerHTML = `<tr><th>Môi trường</th><th>Thời điểm</th><th class="so">CPU %</th><th class="so">RAM MB</th><th class="so">Ổ đĩa GB</th><th class="so">Băng thông MB</th><th>Công suất</th></tr>` +
+    d.soLieuGanDay.slice(0,20).map(r => `<tr><td>${esc(r.MaMoiTruong)}</td><td>${ngayGio(r.ThoiDiem)}</td><td class="so">${so(r.CpuPhanTram)}</td><td class="so">${so(r.RamMB,0)}</td><td class="so">${so(r.OdiaGB)}</td><td class="so">${so(r.BangThongMB)}</td>
+      <td>${r.CongSuatW==null?nhan("UocLuong").replace("Ước lượng","không có watt thật"):so(r.CongSuatW)+" W"}</td></tr>`).join("");
+}
+
+function veTrang(d){
+  const tr = d.hieuNangTrang;
+  $("bangTrang").innerHTML = tr.length ? `<tr><th>URL</th><th class="so">Lần đo</th><th class="so">Tổng KB</th><th>Thành phần</th><th class="so">Request</th><th class="so">TTFB ms</th><th class="so">Tải ms</th><th class="so">Lỗi %</th></tr>` +
+    tr.map(r => {
+      const t = Number(r.TongKBTrungBinh)||0, a = Number(r.AnhKBTrungBinh)||0, j = Number(r.JsKBTrungBinh)||0, c = Number(r.CssKBTrungBinh)||0, k = Math.max(0, t-a-j-c);
+      const p = x => t ? (x/t*100).toFixed(1) : 0;
+      return `<tr><td style="word-break:break-all;min-width:220px">${esc(r.Url)}</td><td class="so">${so(r.SoLanDo,0)}</td><td class="so">${so(t,0)}</td>
+        <td><div class="chong" title="Ảnh ${so(a,0)} KB, JS ${so(j,0)} KB, CSS ${so(c,0)} KB, khác ${so(k,0)} KB"><span class="sa" style="width:${p(a)}%"></span><span class="sj" style="width:${p(j)}%"></span><span class="sc" style="width:${p(c)}%"></span><span class="sk" style="width:${p(k)}%"></span></div></td>
+        <td class="so">${so(r.SoRequestTrungBinh,0)}</td><td class="so">${so(r.TtfbMsTrungBinh,0)}</td><td class="so">${so(r.TaiMsTrungBinh,0)}</td><td class="so">${so(r.TyLeLoiTrungBinh)}</td></tr>`;
+    }).join("") : `<tr><td class="trong">Chưa có số liệu trang. Chạy <code>collector\\page_collector.py</code> để đo.</td></tr>`;
+}
+
+function veCanhBaoHanhDong(cb, hd){
+  const bd = $("bdg"); bd.hidden = !cb.length; bd.textContent = cb.length;
+  $("bangCb").innerHTML = cb.length ? `<tr><th>Môi trường</th><th>Chỉ tiêu</th><th class="so">Giá trị</th><th>Ngưỡng</th><th>Mở lúc</th><th>Trạng thái</th><th></th></tr>` +
+    cb.map(r => `<tr><td>${esc(r.MaMoiTruong)}</td><td>${esc(CHI_TIEU[r.ChiTieu]||r.ChiTieu)}</td><td class="so">${so(r.GiaTriGanNhat)}</td><td>${esc(r.ToanTu)} ${so(r.Nguong)}</td><td>${ngayGio(r.ThoiDiemMo)}</td><td>${esc(TT_CB[r.TrangThai]||r.TrangThai)}</td>
+      <td style="white-space:nowrap">${r.TrangThai==="Mo"?`<button class="phu" data-ack="${r.MaCanhBao}">Xác nhận</button> `:""}<button class="phu" data-dong="${r.MaCanhBao}">Đóng</button></td></tr>`).join("")
+    : `<tr><td class="trong">Không có cảnh báo đang mở.</td></tr>`;
+  $("bangHd").innerHTML = hd.length ? `<tr><th>Loại</th><th>Mô tả</th><th>Trạng thái</th><th>Mức giảm</th><th></th></tr>` +
+    hd.map(r => {
+      let nut = "";
+      if (r.TrangThai==="DeXuat") nut = `<button data-hd="chap-nhan" data-id="${r.MaHanhDong}">Chấp nhận</button> <button class="phu" data-hd="tu-choi" data-id="${r.MaHanhDong}">Từ chối</button>`;
+      if (r.TrangThai==="DaChapNhan") nut = `<button data-hd="da-ap-dung" data-id="${r.MaHanhDong}">Đánh dấu đã áp dụng</button>`;
+      if (r.TrangThai==="DaApDung") nut = `<button class="phu" data-dg="${r.MaHanhDong}">Đánh giá 7 ngày</button>`;
+      return `<tr><td>${esc(r.Loai)}</td><td>${esc(r.MoTa)}</td><td>${esc(TT_HD[r.TrangThai]||r.TrangThai)}${r.NgayApDung?" ("+ngay(r.NgayApDung)+")":""}</td><td>${nhan("UocLuong")}</td><td style="white-space:nowrap">${nut}</td></tr>`;
+    }).join("") : `<tr><td class="trong">Chưa có đề xuất. Luật đề xuất chạy mỗi ngày, hoặc khi bạn bấm "Chạy xử lý ngay".</td></tr>`;
+}
+
+
+async function taiDsUrl(){
+  const sp = encodeURIComponent($("sp").value);
+  const r = await api("/api/v1/pages?maSanPham="+sp);
+  $("bangUrl").innerHTML = r.length ? `<tr><th>URL đã đăng ký</th><th class="so">Lần đo</th><th>Lần đo cuối</th><th></th></tr>` +
+    r.map(x => `<tr><td style="word-break:break-all">${esc(x.Url)}</td><td class="so">${so(x.SoLanDo,0)}</td><td>${x.LanDoCuoi ? ngayGio(x.LanDoCuoi) : "chưa đo"}</td>
+      <td><button class="phu" data-xoaurl="${x.MaTrang}" data-n="${x.SoLanDo}">Xóa</button></td></tr>`).join("")
+    : `<tr><td class="trong">Chưa có URL nào.</td></tr>`;
+}
+$("fTrang").addEventListener("submit", async e => {
+  e.preventDefault();
+  try{
+    await api("/api/v1/pages", {method:"POST", body:JSON.stringify({maSanPham:$("sp").value, url:$("urlMoi").value.trim(), laTrangCuaToi:$("trangCuaToi").checked})});
+    $("urlMoi").value = ""; toast("Đã thêm URL"); await taiDsUrl();
+  }catch(err){ toast(err.message, true); }
+});
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-xoaurl]"); if (!b) return;
+  const n = Number(b.dataset.n);
+  if (!confirm(n ? `Trang này có ${n} lần đo. Xóa luôn cả số liệu đo?` : "Xóa URL này?")) return;
+  try{
+    await api(`/api/v1/pages/${b.dataset.xoaurl}?maSanPham=${encodeURIComponent($("sp").value)}&xoaCaSoLieu=${n>0}`, {method:"DELETE"});
+    toast("Đã xóa"); await taiDsUrl(); await tai();
+  }catch(err){ toast(err.message, true); }
+});
+
+async function tai(){
+  if (dangTai) return; dangTai = true;
+  try{
+    const sp = encodeURIComponent($("sp").value);
+    const [d, cb, hd] = await Promise.all([api("/api/v1/dashboard?maSanPham="+sp), api("/api/v1/alerts?maSanPham="+sp), api("/api/v1/actions?maSanPham="+sp)]);
+    dl = d; veTongQuan(d); veHaTang(d); veTrang(d); veCanhBaoHanhDong(cb, hd); await taiDsUrl();
+  } finally { dangTai = false; }
+}
+function henGio(){
+  clearInterval(hen);
+  if ($("tulam").checked) hen = setInterval(() => { if (!document.hidden && token) tai().catch(()=>{}); }, 30000);
+}
+
+/* ---------- điều hướng ---------- */
+function chonTab(t){
+  tab = t;
+  document.querySelectorAll("[role=tab]").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === t));
+  ["tq","ht","tr","cb"].forEach(k => $("p-"+k).hidden = k !== t);
+  history.replaceState(null, "", "#" + t);
+}
+document.querySelector("nav[role=tablist]").addEventListener("click", e => { const b = e.target.closest("[role=tab]"); if (b) chonTab(b.dataset.tab); });
+document.querySelector("nav[role=tablist]").addEventListener("keydown", e => {
+  const ds = [...document.querySelectorAll("[role=tab]")], i = ds.findIndex(b => b.dataset.tab === tab);
+  if (e.key === "ArrowRight" || e.key === "ArrowLeft"){ const n = ds[(i + (e.key==="ArrowRight"?1:-1) + ds.length) % ds.length]; chonTab(n.dataset.tab); n.focus(); }
+});
+
+function dangXuat(){ token=""; sessionStorage.removeItem("gd_token"); clearInterval(hen);
+  $("dangnhap").hidden=false; $("noidung").hidden=true; $("thanhtren").hidden=true; }
+
+async function vao(){
+  $("loidn").textContent = "";
+  try{
+    const j = await api("/api/v1/auth/login", {method:"POST", body:JSON.stringify({tenDangNhap:$("tdn").value, matKhau:$("mk").value})});
+    token = j.token; sessionStorage.setItem("gd_token", token); $("mk").value=""; await khoiDong();
+  }catch(e){ $("loidn").textContent = e.message; }
+}
+
+async function khoiDong(){
+  const ds = await api("/api/v1/me/san-pham");
+  $("sp").innerHTML = ds.map(s => `<option value="${esc(s.MaSanPham)}">${esc(s.TenSanPham)}</option>`).join("");
+  $("dangnhap").hidden = true; $("noidung").hidden = false; $("thanhtren").hidden = false;
+  const h = location.hash.slice(1); chonTab(["tq","ht","tr","cb"].includes(h) ? h : "tq");
+  if (!ds.length){ $("heroSo").innerHTML = `<span class="thongbao">Tài khoản chưa được gán sản phẩm nào.</span>`; return; }
+  await tai(); henGio();
+}
+
+/* ---------- thao tác ---------- */
+document.addEventListener("click", async e => {
+  const b = e.target.closest("button"); if (!b) return;
+  try{
+    if (b.dataset.ack){ await api(`/api/v1/alerts/${b.dataset.ack}/ack`, {method:"POST"}); toast("Đã xác nhận cảnh báo"); await tai(); }
+    else if (b.dataset.dong){ cbDangDong = b.dataset.dong; $("ghiChu").value = ""; $("hopDong").showModal(); $("ghiChu").focus(); }
+    else if (b.dataset.hd){ await api(`/api/v1/actions/${b.dataset.id}/${b.dataset.hd}`, {method:"POST"});
+      toast({"chap-nhan":"Đã chấp nhận đề xuất","tu-choi":"Đã từ chối đề xuất","da-ap-dung":"Đã ghi nhận ngày áp dụng"}[b.dataset.hd]); await tai(); }
+    else if (b.dataset.dg){
+      try{ const r = await api(`/api/v1/actions/${b.dataset.dg}/danh-gia?soNgay=7`);
+        $("ketquaDG").innerHTML = `<div class="loicam ${r.nhan==="Do"?"do":""}">Trước áp dụng ${so(r.carbonTruocG)} g, sau áp dụng ${so(r.carbonSauG)} g: giảm <b>${so(r.giamG)} g</b> (${r.giamPhanTram==null?"không tính được %":so(r.giamPhanTram)+"%"}) ${nhan(r.nhan)}</div>`;
+      }catch(err){ $("ketquaDG").innerHTML = `<div class="loicam"><span class="loi">${esc(err.message)}</span></div>`; }
+    }
+  }catch(err){ toast(err.message, true); }
+});
+$("fDong").addEventListener("submit", async e => {
+  e.preventDefault();
+  try{ await api(`/api/v1/alerts/${cbDangDong}/close`, {method:"POST", body:JSON.stringify({ghiChu:$("ghiChu").value})}); $("hopDong").close(); toast("Đã đóng cảnh báo"); await tai(); }
+  catch(err){ toast(err.message, true); }
+});
+$("huyDong").onclick = () => $("hopDong").close();
+$("dangnhap").addEventListener("submit", e => { e.preventDefault(); vao(); });
+$("thoat").onclick = dangXuat;
+$("tulam").onchange = henGio;
+$("sp").onchange = () => tai().catch(e => toast(e.message, true));
+$("chay").onclick = async () => {
+  $("chay").disabled = true;
+  try{ await api("/api/v1/admin/chay-xu-ly", {method:"POST"}); await tai(); toast("Đã chạy quy đổi, cảnh báo và đề xuất"); }
+  catch(e){ toast(e.message, true); } finally{ $("chay").disabled = false; }
+};
+$("csv").onclick = async () => {
+  const r = await fetch("/api/v1/reports?maSanPham="+encodeURIComponent($("sp").value), {headers:{Authorization:"Bearer "+token}});
+  if (!r.ok){ toast("Không tải được báo cáo", true); return; }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(await r.blob()); a.download = "greendash_"+$("sp").value+".csv"; a.click();
+};
+if (token) khoiDong().catch(dangXuat);
+</script>
+</body>
+</html>

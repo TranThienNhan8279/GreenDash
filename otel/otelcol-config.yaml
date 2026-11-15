@@ -1,0 +1,38 @@
+# OpenTelemetry Collector (bản contrib). Đối chiếu tên metric với tài liệu hostmetricsreceiver của đúng phiên bản bạn tải.
+receivers:
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu:
+        metrics:
+          system.cpu.utilization:
+            enabled: true
+      memory: {}
+      filesystem: {}
+      network: {}
+
+processors:
+  resource:
+    attributes:
+      - key: greendash.environment_id     # đúng mã trong bảng MoiTruong
+        value: MT001
+        action: upsert
+  batch:
+    timeout: 10s
+
+exporters:
+  otlphttp:
+    endpoint: http://localhost:8000       # Collector tự thêm /v1/metrics
+    encoding: json
+    compression: none                     # API cũng giải nén gzip nếu bạn bật lại
+    headers:
+      X-API-Key: ${env:GREENDASH_API_KEY}
+  debug:                                  # in gói thật ra màn hình để chỉnh mapper; bỏ khi chạy ổn
+    verbosity: detailed
+
+service:
+  pipelines:
+    metrics:
+      receivers: [hostmetrics]
+      processors: [resource, batch]
+      exporters: [otlphttp, debug]

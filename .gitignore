@@ -1,0 +1,26 @@
+# Bí mật và cấu hình máy cá nhân - KHÔNG đưa lên GitHub
+.env
+*.env.local
+otel/*.local.yaml
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Visual Studio / VS Code
+.vs/
+bin/
+obj/
+*.suo
+*.user
+
+# Bản demo WinForms cũ (giai đoạn đầu, không còn dùng)
+GreenDashDemo/
+
+# Tệp tạm
+*.log
+~$*
+Thumbs.db
